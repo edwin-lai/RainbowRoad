@@ -1,4 +1,4 @@
-var COLORS = require('./colors.js');
+var COLORS = require('./tile_colors.js');
 var cards = [];
 
 var generate = function () {
