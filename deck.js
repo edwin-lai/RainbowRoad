@@ -3,10 +3,10 @@ var cards = [];
 
 var generate = function () {
   for (var i = 0; i < COLORS.length; i++) {
-    for (var j = 0; j < 8; j++) {
+    for (var j = 0; j < 6; j++) {
       cards.push({color: COLORS[i], times: 1});
     }
-    for (var k = 0; k < 2; k++) {
+    for (var k = 0; k < 4; k++) {
       cards.push({color: COLORS[i], times: 2});
     }
   }
