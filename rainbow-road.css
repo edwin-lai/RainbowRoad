@@ -1,0 +1,11 @@
+body {
+  height: 1024px;
+  margin: auto;
+  width: 1024px;
+}
+
+h1 {
+  font-size: 36px;
+  margin: 0 auto;
+  width: 256px;
+}
