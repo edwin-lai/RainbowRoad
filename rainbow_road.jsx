@@ -3,7 +3,7 @@ var PLAYER_COLORS = require('./player_colors.js');
 var TILE_COLORS = require('./tile_colors.js');
 var QUADRANTS = require('./quadrants.js');
 var TILE_SIZE = 32;
-var TILE_RADIUS = 4;
+var TOKEN_RADIUS = 6;
 var HEIGHT = 480;
 var WIDTH = 1024;
 var CARD_WIDTH = 192;
@@ -18,25 +18,26 @@ var Player = require('./player.js');
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 var stage = new createjs.Stage('canvas');
-var board = new createjs.Shape();
+var winTile = new createjs.Shape();
 var tiles = [];
 var player = [];
 var turn = 0;
 
-window.deck = new Deck;
-window.deck.shuffle();
+var deck = new Deck;
+deck.shuffle();
 
 for (var k = 0; k < NUM_PLAYERS; k++) {
   player.push(new Player(i, 0));
 }
 
-board.graphics.beginFill('black').drawRect(0, 0, 1, 32);
-board.graphics.beginFill('black').drawRect(0, 0, 32, 1);
-board.graphics.beginFill('black').drawRect(0, 31, 32, 1);
-board.graphics.beginFill('black').drawRect(31, 0, 1, 32);
+winTile.graphics.beginFill('black').drawRect(0, 0, 1, TILE_SIZE);
+winTile.graphics.beginFill('black').drawRect(0, 0, TILE_SIZE, 1);
+winTile.graphics.beginFill('black').drawRect(0, 31, TILE_SIZE, 1);
+winTile.graphics.beginFill('black').drawRect(31, 0, 1, TILE_SIZE);
 for (var j = 0; j < TILE_COLORS.length; j++) {
-  board.graphics.beginFill(TILE_COLORS[j]).drawRect(1, j * 5 + 1, 30, 5);
+  winTile.graphics.beginFill(TILE_COLORS[j]).drawRect(1, j * 5 + 1, 30, 5);
 }
+
 
 var logIdx = function (event, i) {
   console.log('I clicked on tile ' + i);
@@ -65,7 +66,7 @@ for (var m = 0; m < player.length; m++) {
     .drawCircle(
       tiles[0].x + TILE_SIZE * QUADRANTS[m].x,
       tiles[0].y + TILE_SIZE * QUADRANTS[m].y,
-      6
+      TOKEN_RADIUS
     );
 }
 
@@ -107,13 +108,24 @@ card.addEventListener('click', function (event) {
     );
   }
 
-  var currentPlayer = player[turn % 4];
+  var currentPlayer = player[turn % NUM_PLAYERS];
   var origPos = currentPlayer.position;
   var start = origPos + 1 + (6 * (cardToDisplay.times - 1));
 
   for (var n = start; n < start + 6; n++) {
     if (n > 133) {
-      alert(PLAYER_COLORS[turn % 4] + ' wins!!!');
+      tiles[origPos].graphic.graphics.beginStroke(null).
+        beginFill(tiles[origPos].color).drawRect(
+          tiles[origPos].x,
+          tiles[origPos].y,
+          TILE_SIZE,
+          TILE_SIZE
+        );
+      winTile.graphics.beginStroke('black')
+        .beginFill(PLAYER_COLORS[turn % NUM_PLAYERS])
+        .drawCircle(TILE_SIZE / 2, TILE_SIZE / 2, TOKEN_RADIUS * 2);
+      stage.update();
+      alert(PLAYER_COLORS[turn % NUM_PLAYERS] + ' wins!!!');
       card.removeAllEventListeners();
       return;
     }
@@ -124,12 +136,12 @@ card.addEventListener('click', function (event) {
   }
 
   tiles[origPos].graphic.graphics.beginStroke(null).
-  beginFill(tiles[origPos].color).drawRect(
-    tiles[origPos].x,
-    tiles[origPos].y,
-    TILE_SIZE,
-    TILE_SIZE
-  );
+    beginFill(tiles[origPos].color).drawRect(
+      tiles[origPos].x,
+      tiles[origPos].y,
+      TILE_SIZE,
+      TILE_SIZE
+    );
 
   for (var p = 0; p < player.length; p++) {
     if (player[p].position === origPos) {
@@ -137,15 +149,17 @@ card.addEventListener('click', function (event) {
         .beginFill(PLAYER_COLORS[p]).drawCircle(
           tiles[origPos].x + TILE_SIZE * QUADRANTS[p].x,
           tiles[origPos].y + TILE_SIZE * QUADRANTS[p].y,
-          6
+          TOKEN_RADIUS
         );
     }
   }
 
   tiles[currentPlayer.position].graphic.graphics.beginStroke('black')
-    .beginFill(PLAYER_COLORS[turn % 4]).drawCircle(
-      tiles[currentPlayer.position].x + TILE_SIZE * QUADRANTS[turn % 4].x,
-      tiles[currentPlayer.position].y + TILE_SIZE * QUADRANTS[turn % 4].y,
+    .beginFill(PLAYER_COLORS[turn % NUM_PLAYERS]).drawCircle(
+      tiles[currentPlayer.position].x
+        + TILE_SIZE * QUADRANTS[turn % NUM_PLAYERS].x,
+      tiles[currentPlayer.position].y
+        + TILE_SIZE * QUADRANTS[turn % NUM_PLAYERS].y,
       6
     );
 
@@ -155,5 +169,14 @@ card.addEventListener('click', function (event) {
 
 stage.addChild(card);
 
-stage.addChild(board);
+var instructions = new createjs.Text(
+  'Click Card to Play',
+  '20px Verdana',
+  '#000000'
+);
+instructions.x = 680;
+instructions.y = 80;
+
+stage.addChild(winTile);
+stage.addChild(instructions);
 stage.update();
