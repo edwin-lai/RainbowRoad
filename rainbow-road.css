@@ -1,10 +1,18 @@
 body {
+  background-image: url('http://apod.nasa.gov/apod/image/1505/AuroraNorway_Richardsen_2330.jpg');
+  background-size: 185%;
   margin: auto;
   width: 1024px;
 }
 
+canvas {
+  margin-bottom: 64px;
+}
+
 h1 {
-  font-size: 36px;
-  margin: 0 auto;
+  color: white;
+  font-family: 'Raleway';
+  font-size: 48px;
+  margin: 16px auto;
   width: 256px;
 }

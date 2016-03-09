@@ -22,22 +22,25 @@ var winTile = new createjs.Shape();
 var tiles = [];
 var player = [];
 var turn = 0;
-
 var deck = new Deck;
 deck.shuffle();
+
+stage.enableDOMEvents(true);
+
+createjs.Ticker.addEventListener("tick", function(){stage.update(event);});
 
 for (var k = 0; k < NUM_PLAYERS; k++) {
   player.push(new Player(i, 0));
 }
 
-winTile.graphics.beginFill('black').drawRect(0, 0, 1, TILE_SIZE);
-winTile.graphics.beginFill('black').drawRect(0, 0, TILE_SIZE, 1);
-winTile.graphics.beginFill('black').drawRect(0, 31, TILE_SIZE, 1);
-winTile.graphics.beginFill('black').drawRect(31, 0, 1, TILE_SIZE);
+winTile.graphics.beginFill('white').drawRect(0, 0, 1, TILE_SIZE);
+winTile.graphics.beginFill('white').drawRect(0, 0, TILE_SIZE, 1);
+winTile.graphics.beginFill('white').drawRect(0, 31, TILE_SIZE, 1);
+winTile.graphics.beginFill('white').drawRect(31, 0, 1, TILE_SIZE);
 for (var j = 0; j < TILE_COLORS.length; j++) {
   winTile.graphics.beginFill(TILE_COLORS[j]).drawRect(1, j * 5 + 1, 30, 5);
 }
-
+stage.addChild(winTile);
 
 var logIdx = function (event, i) {
   console.log('I clicked on tile ' + i);
@@ -51,7 +54,7 @@ for (var i = 0; i < 134; i++) {
     TILE_COLORS[i % 6]
   );
   tiles.push(tile);
-  tile.graphic.graphics.beginFill(tile.color).drawRect(
+  tile.graphic.graphics.beginStroke('white').beginFill(tile.color).drawRect(
     tile.x,
     tile.y,
     TILE_SIZE,
@@ -62,12 +65,13 @@ for (var i = 0; i < 134; i++) {
 }
 
 for (var m = 0; m < player.length; m++) {
-  tiles[0].graphic.graphics.beginStroke('black').beginFill(PLAYER_COLORS[m])
-    .drawCircle(
-      tiles[0].x + TILE_SIZE * QUADRANTS[m].x,
-      tiles[0].y + TILE_SIZE * QUADRANTS[m].y,
-      TOKEN_RADIUS
-    );
+  player[m].token.set({
+    graphics: new createjs.Graphics().beginStroke('black')
+      .beginFill(PLAYER_COLORS[m]).drawCircle(0, 0, TOKEN_RADIUS),
+    x: tiles[0].x + TILE_SIZE * QUADRANTS[m].x,
+    y: tiles[0].y + TILE_SIZE * QUADRANTS[m].y
+  });
+  stage.addChild(player[m].token);
 }
 
 var card = new createjs.Shape();
@@ -77,6 +81,7 @@ card.graphics.beginStroke('black').beginFill('white').drawRect(
   CARD_WIDTH,
   CARD_HEIGHT
 );
+
 card.addEventListener('click', function (event) {
   var cardToDisplay = deck.draw();
   card.graphics.beginStroke('black').beginFill('white').drawRect(
@@ -114,18 +119,11 @@ card.addEventListener('click', function (event) {
 
   for (var n = start; n < start + 6; n++) {
     if (n > 133) {
-      tiles[origPos].graphic.graphics.beginStroke(null).
-        beginFill(tiles[origPos].color).drawRect(
-          tiles[origPos].x,
-          tiles[origPos].y,
-          TILE_SIZE,
-          TILE_SIZE
-        );
-      winTile.graphics.beginStroke('black')
-        .beginFill(PLAYER_COLORS[turn % NUM_PLAYERS])
-        .drawCircle(TILE_SIZE / 2, TILE_SIZE / 2, TOKEN_RADIUS * 2);
+      createjs.Tween.get(currentPlayer.token).to({
+        x: TILE_SIZE * QUADRANTS[turn % NUM_PLAYERS].x,
+        y: TILE_SIZE * QUADRANTS[turn % NUM_PLAYERS].y
+      }, 1000);
       stage.update();
-      alert(PLAYER_COLORS[turn % NUM_PLAYERS] + ' wins!!!');
       card.removeAllEventListeners();
       return;
     }
@@ -135,33 +133,12 @@ card.addEventListener('click', function (event) {
     }
   }
 
-  tiles[origPos].graphic.graphics.beginStroke(null).
-    beginFill(tiles[origPos].color).drawRect(
-      tiles[origPos].x,
-      tiles[origPos].y,
-      TILE_SIZE,
-      TILE_SIZE
-    );
-
-  for (var p = 0; p < player.length; p++) {
-    if (player[p].position === origPos) {
-      tiles[origPos].graphic.graphics.beginStroke('black')
-        .beginFill(PLAYER_COLORS[p]).drawCircle(
-          tiles[origPos].x + TILE_SIZE * QUADRANTS[p].x,
-          tiles[origPos].y + TILE_SIZE * QUADRANTS[p].y,
-          TOKEN_RADIUS
-        );
-    }
-  }
-
-  tiles[currentPlayer.position].graphic.graphics.beginStroke('black')
-    .beginFill(PLAYER_COLORS[turn % NUM_PLAYERS]).drawCircle(
-      tiles[currentPlayer.position].x
-        + TILE_SIZE * QUADRANTS[turn % NUM_PLAYERS].x,
-      tiles[currentPlayer.position].y
-        + TILE_SIZE * QUADRANTS[turn % NUM_PLAYERS].y,
-      6
-    );
+  createjs.Tween.get(currentPlayer.token).to({
+    x: tiles[currentPlayer.position].x
+      + TILE_SIZE * QUADRANTS[turn % NUM_PLAYERS].x,
+    y: tiles[currentPlayer.position].y
+      + TILE_SIZE * QUADRANTS[turn % NUM_PLAYERS].y
+  }, 1000);
 
   turn++;
   stage.update();
@@ -171,12 +148,11 @@ stage.addChild(card);
 
 var instructions = new createjs.Text(
   'Click Card to Play',
-  '20px Verdana',
-  '#000000'
+  '20px Raleway',
+  '#ffffff'
 );
 instructions.x = 680;
 instructions.y = 80;
 
-stage.addChild(winTile);
 stage.addChild(instructions);
 stage.update();
