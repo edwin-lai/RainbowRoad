@@ -10,6 +10,7 @@ var CARD_WIDTH = 192;
 var CARD_HEIGHT = 256;
 var CARD_CONTENT_SIZE = 96;
 var NUM_PLAYERS = 4;
+var NUM_HUMANS = 1;
 var Deck = require('./deck.js');
 var RowColCalc = require('./rowColCalc.js');
 var Tile = require('./tile.js');
@@ -82,7 +83,11 @@ card.graphics.beginStroke('black').beginFill('white').drawRect(
   CARD_HEIGHT
 );
 
-card.addEventListener('click', function (event) {
+var playTurn = function (event) {
+  card.removeAllEventListeners();
+  createjs.Tween.get(status).to({
+    text: 'Current Player: ' + PLAYER_COLORS[turn % NUM_PLAYERS]
+  }, 100);
   var cardToDisplay = deck.draw();
   card.graphics.beginStroke('black').beginFill('white').drawRect(
     WIDTH * 0.75 - CARD_WIDTH * 0.5,
@@ -123,7 +128,6 @@ card.addEventListener('click', function (event) {
         x: TILE_SIZE * QUADRANTS[turn % NUM_PLAYERS].x,
         y: TILE_SIZE * QUADRANTS[turn % NUM_PLAYERS].y
       }, 1000);
-      stage.update();
       card.removeAllEventListeners();
       return;
     }
@@ -138,21 +142,31 @@ card.addEventListener('click', function (event) {
       + TILE_SIZE * QUADRANTS[turn % NUM_PLAYERS].x,
     y: tiles[currentPlayer.position].y
       + TILE_SIZE * QUADRANTS[turn % NUM_PLAYERS].y
-  }, 1000);
+  }, 1000).call(function () {
+    createjs.Tween.get(status).to({
+      text: 'Current Player: ' + PLAYER_COLORS[turn % NUM_PLAYERS]
+    }, 100);
+    if (turn % NUM_PLAYERS < NUM_HUMANS) {
+      card.addEventListener('click', listener);
+    } else {
+      playTurn();
+    }
+  });
 
   turn++;
-  stage.update();
-});
+};
+
+var listener = card.addEventListener('click', playTurn);
 
 stage.addChild(card);
 
-var instructions = new createjs.Text(
+var status = new createjs.Text(
   'Click Card to Play',
   '20px Raleway',
   '#ffffff'
 );
-instructions.x = 680;
-instructions.y = 80;
+status.x = 680;
+status.y = 80;
 
-stage.addChild(instructions);
+stage.addChild(status);
 stage.update();
