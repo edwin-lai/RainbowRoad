@@ -21,13 +21,13 @@ function deck () {
   this.draw = function () {
     if (this.cards.length > 0) {
       this.drawnCards.push(this.cards.pop());
-      return this.drawnCards[this.drawnCards.length - 1];
     } else {
       this.cards = this.drawnCards;
       this.drawnCards = [];
       this.shuffle();
-      this.draw();
+      this.drawnCards.push(this.cards.pop());
     }
+    return this.drawnCards[this.drawnCards.length - 1];
   };
 
   this.shuffle = function () {

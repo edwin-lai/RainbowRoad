@@ -23,8 +23,8 @@ var tiles = [];
 var player = [];
 var turn = 0;
 
-var deck = new Deck;
-deck.shuffle();
+window.deck = new Deck;
+window.deck.shuffle();
 
 for (var k = 0; k < NUM_PLAYERS; k++) {
   player.push(new Player(i, 0));
@@ -107,8 +107,49 @@ card.addEventListener('click', function (event) {
     );
   }
 
+  var currentPlayer = player[turn % 4];
+  var origPos = currentPlayer.position;
+  var start = origPos + 1 + (6 * (cardToDisplay.times - 1));
 
+  for (var n = start; n < start + 6; n++) {
+    if (n > 133) {
+      alert(PLAYER_COLORS[turn % 4] + ' wins!!!');
+      card.removeAllEventListeners();
+      return;
+    }
+    if (tiles[n].color === cardToDisplay.color) {
+      currentPlayer.position = n;
+      break;
+    }
+  }
 
+  tiles[origPos].graphic.graphics.beginStroke(null).
+  beginFill(tiles[origPos].color).drawRect(
+    tiles[origPos].x,
+    tiles[origPos].y,
+    TILE_SIZE,
+    TILE_SIZE
+  );
+
+  for (var p = 0; p < player.length; p++) {
+    if (player[p].position === origPos) {
+      tiles[origPos].graphic.graphics.beginStroke('black')
+        .beginFill(PLAYER_COLORS[p]).drawCircle(
+          tiles[origPos].x + TILE_SIZE * QUADRANTS[p].x,
+          tiles[origPos].y + TILE_SIZE * QUADRANTS[p].y,
+          6
+        );
+    }
+  }
+
+  tiles[currentPlayer.position].graphic.graphics.beginStroke('black')
+    .beginFill(PLAYER_COLORS[turn % 4]).drawCircle(
+      tiles[currentPlayer.position].x + TILE_SIZE * QUADRANTS[turn % 4].x,
+      tiles[currentPlayer.position].y + TILE_SIZE * QUADRANTS[turn % 4].y,
+      6
+    );
+
+  turn++;
   stage.update();
 });
 
