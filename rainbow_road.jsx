@@ -10,42 +10,34 @@ var CARD_WIDTH = 192;
 var CARD_HEIGHT = 256;
 var CARD_CONTENT_SIZE = 96;
 var NUM_PLAYERS = 4;
-var NUM_HUMANS = 1;
 var Deck = require('./deck.js');
 var RowColCalc = require('./rowColCalc.js');
 var Tile = require('./tile.js');
 var Player = require('./player.js');
+var winTile = require('./create_win_tile.js');
+var displayCard = require('./display_card.js');
+var displayWinMessages = require('./display_win_messages.js');
 
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 var stage = new createjs.Stage('canvas');
-var winTile = new createjs.Shape();
 var tiles = [];
 var player = [];
 var turn = 0;
 var deck = new Deck;
-deck.shuffle();
 
 stage.enableDOMEvents(true);
+stage.enableMouseOver(10);
 
 createjs.Ticker.addEventListener("tick", function(){stage.update(event);});
 
 for (var k = 0; k < NUM_PLAYERS; k++) {
-  player.push(new Player(i, 0));
+  player.push(new Player(k, 0));
 }
 
-winTile.graphics.beginFill('white').drawRect(0, 0, 1, TILE_SIZE);
-winTile.graphics.beginFill('white').drawRect(0, 0, TILE_SIZE, 1);
-winTile.graphics.beginFill('white').drawRect(0, 31, TILE_SIZE, 1);
-winTile.graphics.beginFill('white').drawRect(31, 0, 1, TILE_SIZE);
-for (var j = 0; j < TILE_COLORS.length; j++) {
-  winTile.graphics.beginFill(TILE_COLORS[j]).drawRect(1, j * 5 + 1, 30, 5);
-}
-stage.addChild(winTile);
+deck.shuffle();
 
-var logIdx = function (event, i) {
-  console.log('I clicked on tile ' + i);
-};
+stage.addChild(winTile());
 
 for (var i = 0; i < 134; i++) {
   var tile = new Tile(
@@ -61,7 +53,7 @@ for (var i = 0; i < 134; i++) {
     TILE_SIZE,
     TILE_SIZE
   );
-  tile.graphic.addEventListener('click', logIdx.bind(this, event, i));
+  tile.graphic.alpha = 0.5;
   stage.addChild(tile.graphic);
 }
 
@@ -76,97 +68,101 @@ for (var m = 0; m < player.length; m++) {
 }
 
 var card = new createjs.Shape();
-card.graphics.beginStroke('black').beginFill('white').drawRect(
-  WIDTH * 0.75 - CARD_WIDTH * 0.5,
-  HEIGHT * 0.5 - CARD_HEIGHT * 0.5,
-  CARD_WIDTH,
-  CARD_HEIGHT
-);
-
-var playTurn = function (event) {
-  card.removeAllEventListeners();
-  createjs.Tween.get(status).to({
-    text: 'Current Player: ' + PLAYER_COLORS[turn % NUM_PLAYERS]
-  }, 100);
-  var cardToDisplay = deck.draw();
+var wipeCard = function () {
   card.graphics.beginStroke('black').beginFill('white').drawRect(
     WIDTH * 0.75 - CARD_WIDTH * 0.5,
     HEIGHT * 0.5 - CARD_HEIGHT * 0.5,
     CARD_WIDTH,
     CARD_HEIGHT
   );
+};
+wipeCard();
+stage.addChild(card);
 
-  if (cardToDisplay.times === 1) {
-    card.graphics.beginStroke(null).beginFill(cardToDisplay.color).drawRect(
-      WIDTH * 0.75 - CARD_CONTENT_SIZE * 0.5,
-      HEIGHT * 0.5 - CARD_CONTENT_SIZE * 0.5,
-      CARD_CONTENT_SIZE,
-      CARD_CONTENT_SIZE
-    );
-  } else {
-    card.graphics.beginStroke(null).beginFill(cardToDisplay.color).drawRect(
-      WIDTH * 0.75 - CARD_CONTENT_SIZE * 0.5,
-      HEIGHT * 0.5 - CARD_CONTENT_SIZE * 1.1,
-      CARD_CONTENT_SIZE,
-      CARD_CONTENT_SIZE
-    );
-    card.graphics.beginStroke(null).beginFill(cardToDisplay.color).drawRect(
-      WIDTH * 0.75 - CARD_CONTENT_SIZE * 0.5,
-      HEIGHT * 0.5 + CARD_CONTENT_SIZE * 0.1,
-      CARD_CONTENT_SIZE,
-      CARD_CONTENT_SIZE
-    );
-  }
+var status = new createjs.Text(
+  'Current Player: ' + PLAYER_COLORS[turn % NUM_PLAYERS],
+  '20px Raleway',
+  '#ffffff'
+);
+status.x = 672;
+status.y = 80;
 
-  var currentPlayer = player[turn % NUM_PLAYERS];
-  var origPos = currentPlayer.position;
-  var start = origPos + 1 + (6 * (cardToDisplay.times - 1));
+stage.addChild(status);
 
-  for (var n = start; n < start + 6; n++) {
-    if (n > 133) {
-      createjs.Tween.get(currentPlayer.token).to({
-        x: TILE_SIZE * QUADRANTS[turn % NUM_PLAYERS].x,
-        y: TILE_SIZE * QUADRANTS[turn % NUM_PLAYERS].y
-      }, 1000);
-      card.removeAllEventListeners();
-      return;
-    }
-    if (tiles[n].color === cardToDisplay.color) {
-      currentPlayer.position = n;
-      break;
-    }
-  }
-
+var moveToken = function (currentPlayer) {
   createjs.Tween.get(currentPlayer.token).to({
     x: tiles[currentPlayer.position].x
       + TILE_SIZE * QUADRANTS[turn % NUM_PLAYERS].x,
     y: tiles[currentPlayer.position].y
       + TILE_SIZE * QUADRANTS[turn % NUM_PLAYERS].y
-  }, 1000).call(function () {
-    createjs.Tween.get(status).to({
-      text: 'Current Player: ' + PLAYER_COLORS[turn % NUM_PLAYERS]
-    }, 100);
-    if (turn % NUM_PLAYERS < NUM_HUMANS) {
-      card.addEventListener('click', listener);
-    } else {
-      playTurn();
-    }
-  });
-
-  turn++;
+  }, 1000).call(advanceTurn);
 };
 
-var listener = card.addEventListener('click', playTurn);
+var advanceTurn = function () {
+  turn++;
+  createjs.Tween.get(status).to({
+    text: 'Current Player: ' + PLAYER_COLORS[turn % NUM_PLAYERS]
+  }, 100);
+  wipeCard();
+  if (turn % NUM_PLAYERS < window.numHumans) {
+    card.addEventListener('click', playTurnListener);
+  } else {
+    setTimeout(playTurn, 1000);
+  }
+};
 
-stage.addChild(card);
+var blink = function (position) {
+  return createjs.Tween.get(tiles[position].graphic, {loop: true})
+    .to({alpha: 1}, 1000);
+};
 
-var status = new createjs.Text(
-  'Click Card to Play',
-  '20px Raleway',
-  '#ffffff'
-);
-status.x = 680;
-status.y = 80;
+var deblink = function (tween, position) {
+  tween.setPaused(true);
+  tiles[position].graphic.alpha = 0.5;
+  tiles[position].graphic.removeAllEventListeners();
+};
 
-stage.addChild(status);
-stage.update();
+var playTurn = function (event) {
+  card.removeAllEventListeners();
+  var cardDrawn = deck.draw();
+  var currentPlayer = player[turn % NUM_PLAYERS];
+  var origPos = currentPlayer.position;
+  var start = origPos + 1 + (6 * (cardDrawn.times - 1));
+
+  displayCard(card, cardDrawn);
+
+  for (var n = start; n < start + 6; n++) {
+    if (n > 133) { // win condition
+      createjs.Tween.get(currentPlayer.token).to({
+        x: TILE_SIZE * QUADRANTS[turn % NUM_PLAYERS].x,
+        y: TILE_SIZE * QUADRANTS[turn % NUM_PLAYERS].y
+      }, 1000);
+      card.removeAllEventListeners();
+      displayWinMessages(stage, turn, NUM_PLAYERS);
+      return;
+    }
+    if (tiles[n].color === cardDrawn.color) {
+      currentPlayer.position = n;
+      break;
+    }
+  }
+
+  if (turn % NUM_PLAYERS < window.numHumans) {
+    var startTileTween = blink(origPos);
+    tiles[origPos].graphic.addEventListener('click', function () {
+      deblink(startTileTween, origPos);
+      var endTileTween = blink(currentPlayer.position);
+      tiles[currentPlayer.position].graphic.addEventListener('click',
+        function () {
+          deblink(endTileTween, currentPlayer.position);
+          moveToken(currentPlayer);
+        }
+      );
+    });
+  }
+  else {
+    setTimeout(moveToken.bind(this, currentPlayer), 1000);
+  }
+};
+
+var playTurnListener = card.addEventListener('click', playTurn);
