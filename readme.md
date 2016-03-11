@@ -1,6 +1,6 @@
 # RainbowRoad
 
-# [Play Game!](http://edwin-lai.github.io/RainbowRoad/)
+** [Play Game!](http://edwin-lai.github.io/RainbowRoad/) **
 
 ## Instructions
 1. Enter the number of human players.
