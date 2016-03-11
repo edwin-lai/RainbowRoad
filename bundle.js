@@ -45,9 +45,9 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	/* global createjs */
-	var PLAYER_COLORS = __webpack_require__(14);
-	var TILE_COLORS = __webpack_require__(15);
-	var QUADRANTS = __webpack_require__(16);
+	var PLAYER_COLORS = __webpack_require__(1);
+	var TILE_COLORS = __webpack_require__(2);
+	var QUADRANTS = __webpack_require__(3);
 	var TILE_SIZE = 32;
 	var TOKEN_RADIUS = 6;
 	var HEIGHT = 480;
@@ -56,13 +56,13 @@
 	var CARD_HEIGHT = 256;
 	var CARD_CONTENT_SIZE = 96;
 	var NUM_PLAYERS = 4;
-	var Deck = __webpack_require__(7);
-	var RowColCalc = __webpack_require__(2);
-	var Tile = __webpack_require__(12);
-	var Player = __webpack_require__(13);
-	var winTile = __webpack_require__(19);
-	var displayCard = __webpack_require__(18);
-	var displayWinMessages = __webpack_require__(17);
+	var Deck = __webpack_require__(4);
+	var RowColCalc = __webpack_require__(5);
+	var Tile = __webpack_require__(6);
+	var Player = __webpack_require__(7);
+	var winTile = __webpack_require__(8);
+	var displayCard = __webpack_require__(9);
+	var displayWinMessages = __webpack_require__(10);
 	
 	var canvas = document.getElementById('canvas');
 	var ctx = canvas.getContext('2d');
@@ -191,45 +191,28 @@
 	var playTurnListener = card.addEventListener('click', playTurn);
 
 /***/ },
-/* 1 */,
+/* 1 */
+/***/ function(module, exports) {
+
+	module.exports = ['red', 'yellow', 'green', 'blue'];
+
+/***/ },
 /* 2 */
 /***/ function(module, exports) {
 
-	module.exports = {
-	  rowNumber: function (i) {
-	    if (i % 17 === 16) {
-	      return (Math.floor(i / 17) + 1) * 2;
-	    } else {
-	      return (Math.floor(i / 17) + 1) * 2 - 1;
-	    }
-	  },
-	
-	  columnNumber: function (i) {
-	    if ((Math.floor(i / 17) + 1) % 2) {
-	      if (i % 17 === 16) {
-	        return 15;
-	      } else {
-	        return i % 17;
-	      }
-	    } else {
-	      if (i % 17 === 16) {
-	        return 0;
-	      } else {
-	        return 15 - i % 17;
-	      }
-	    }
-	  }
-	};
+	module.exports = ['red', 'purple', 'yellow', 'blue', 'orange', 'green'];
 
 /***/ },
-/* 3 */,
-/* 4 */,
-/* 5 */,
-/* 6 */,
-/* 7 */
+/* 3 */
+/***/ function(module, exports) {
+
+	module.exports = [{ x: 0.25, y: 0.25 }, { x: 0.75, y: 0.25 }, { x: 0.25, y: 0.75 }, { x: 0.75, y: 0.75 }];
+
+/***/ },
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var COLORS = __webpack_require__(15);
+	var COLORS = __webpack_require__(2);
 	var cards = [];
 	
 	var generate = function () {
@@ -280,11 +263,37 @@
 	module.exports = deck;
 
 /***/ },
-/* 8 */,
-/* 9 */,
-/* 10 */,
-/* 11 */,
-/* 12 */
+/* 5 */
+/***/ function(module, exports) {
+
+	module.exports = {
+	  rowNumber: function (i) {
+	    if (i % 17 === 16) {
+	      return (Math.floor(i / 17) + 1) * 2;
+	    } else {
+	      return (Math.floor(i / 17) + 1) * 2 - 1;
+	    }
+	  },
+	
+	  columnNumber: function (i) {
+	    if ((Math.floor(i / 17) + 1) % 2) {
+	      if (i % 17 === 16) {
+	        return 15;
+	      } else {
+	        return i % 17;
+	      }
+	    } else {
+	      if (i % 17 === 16) {
+	        return 0;
+	      } else {
+	        return 15 - i % 17;
+	      }
+	    }
+	  }
+	};
+
+/***/ },
+/* 6 */
 /***/ function(module, exports) {
 
 	/* global createjs */
@@ -298,11 +307,11 @@
 	};
 
 /***/ },
-/* 13 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* global createjs */
-	var PLAYER_COLORS = __webpack_require__(14);
+	var PLAYER_COLORS = __webpack_require__(1);
 	
 	module.exports = function Player(num) {
 	  this.num = num;
@@ -313,29 +322,52 @@
 	};
 
 /***/ },
-/* 14 */
-/***/ function(module, exports) {
-
-	module.exports = ['red', 'yellow', 'green', 'blue'];
-
-/***/ },
-/* 15 */
-/***/ function(module, exports) {
-
-	module.exports = ['red', 'purple', 'yellow', 'blue', 'orange', 'green'];
-
-/***/ },
-/* 16 */
-/***/ function(module, exports) {
-
-	module.exports = [{ x: 0.25, y: 0.25 }, { x: 0.75, y: 0.25 }, { x: 0.25, y: 0.75 }, { x: 0.75, y: 0.75 }];
-
-/***/ },
-/* 17 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* global createjs */
-	var PLAYER_COLORS = __webpack_require__(14);
+	var TILE_COLORS = __webpack_require__(2);
+	var TILE_SIZE = 32;
+	
+	module.exports = function (stage) {
+	  var winTile = new createjs.Shape();
+	  winTile.graphics.beginFill('white').drawRect(0, 0, 1, TILE_SIZE);
+	  winTile.graphics.beginFill('white').drawRect(0, 0, TILE_SIZE, 1);
+	  winTile.graphics.beginFill('white').drawRect(0, 31, TILE_SIZE, 1);
+	  winTile.graphics.beginFill('white').drawRect(31, 0, 1, TILE_SIZE);
+	  for (var j = 0; j < TILE_COLORS.length; j++) {
+	    winTile.graphics.beginFill(TILE_COLORS[j]).drawRect(1, j * 5 + 1, 30, 5);
+	  }
+	  return winTile;
+	};
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	var HEIGHT = 480;
+	var WIDTH = 1024;
+	var CARD_WIDTH = 192;
+	var CARD_HEIGHT = 256;
+	var CARD_CONTENT_SIZE = 96;
+	
+	module.exports = function (card, cardToDisplay) {
+	  card.graphics.beginStroke('black').beginFill('white').drawRect(WIDTH * 0.75 - CARD_WIDTH * 0.5, HEIGHT * 0.5 - CARD_HEIGHT * 0.5, CARD_WIDTH, CARD_HEIGHT);
+	
+	  if (cardToDisplay.times === 1) {
+	    card.graphics.beginStroke(null).beginFill(cardToDisplay.color).drawRect(WIDTH * 0.75 - CARD_CONTENT_SIZE * 0.5, HEIGHT * 0.5 - CARD_CONTENT_SIZE * 0.5, CARD_CONTENT_SIZE, CARD_CONTENT_SIZE);
+	  } else {
+	    card.graphics.beginStroke(null).beginFill(cardToDisplay.color).drawRect(WIDTH * 0.75 - CARD_CONTENT_SIZE * 0.5, HEIGHT * 0.5 - CARD_CONTENT_SIZE * 1.1, CARD_CONTENT_SIZE, CARD_CONTENT_SIZE);
+	    card.graphics.beginStroke(null).beginFill(cardToDisplay.color).drawRect(WIDTH * 0.75 - CARD_CONTENT_SIZE * 0.5, HEIGHT * 0.5 + CARD_CONTENT_SIZE * 0.1, CARD_CONTENT_SIZE, CARD_CONTENT_SIZE);
+	  }
+	};
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* global createjs */
+	var PLAYER_COLORS = __webpack_require__(1);
 	
 	var refresh = function () {
 	  window.location.reload();
@@ -369,47 +401,6 @@
 	  playAgain.addEventListener('click', refresh);
 	  playAgainOutline.addEventListener('click', refresh);
 	  stage.addChild(winMessage, winMessageOutline, playAgain, playAgainOutline);
-	};
-
-/***/ },
-/* 18 */
-/***/ function(module, exports) {
-
-	var HEIGHT = 480;
-	var WIDTH = 1024;
-	var CARD_WIDTH = 192;
-	var CARD_HEIGHT = 256;
-	var CARD_CONTENT_SIZE = 96;
-	
-	module.exports = function (card, cardToDisplay) {
-	  card.graphics.beginStroke('black').beginFill('white').drawRect(WIDTH * 0.75 - CARD_WIDTH * 0.5, HEIGHT * 0.5 - CARD_HEIGHT * 0.5, CARD_WIDTH, CARD_HEIGHT);
-	
-	  if (cardToDisplay.times === 1) {
-	    card.graphics.beginStroke(null).beginFill(cardToDisplay.color).drawRect(WIDTH * 0.75 - CARD_CONTENT_SIZE * 0.5, HEIGHT * 0.5 - CARD_CONTENT_SIZE * 0.5, CARD_CONTENT_SIZE, CARD_CONTENT_SIZE);
-	  } else {
-	    card.graphics.beginStroke(null).beginFill(cardToDisplay.color).drawRect(WIDTH * 0.75 - CARD_CONTENT_SIZE * 0.5, HEIGHT * 0.5 - CARD_CONTENT_SIZE * 1.1, CARD_CONTENT_SIZE, CARD_CONTENT_SIZE);
-	    card.graphics.beginStroke(null).beginFill(cardToDisplay.color).drawRect(WIDTH * 0.75 - CARD_CONTENT_SIZE * 0.5, HEIGHT * 0.5 + CARD_CONTENT_SIZE * 0.1, CARD_CONTENT_SIZE, CARD_CONTENT_SIZE);
-	  }
-	};
-
-/***/ },
-/* 19 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* global createjs */
-	var TILE_COLORS = __webpack_require__(15);
-	var TILE_SIZE = 32;
-	
-	module.exports = function (stage) {
-	  var winTile = new createjs.Shape();
-	  winTile.graphics.beginFill('white').drawRect(0, 0, 1, TILE_SIZE);
-	  winTile.graphics.beginFill('white').drawRect(0, 0, TILE_SIZE, 1);
-	  winTile.graphics.beginFill('white').drawRect(0, 31, TILE_SIZE, 1);
-	  winTile.graphics.beginFill('white').drawRect(31, 0, 1, TILE_SIZE);
-	  for (var j = 0; j < TILE_COLORS.length; j++) {
-	    winTile.graphics.beginFill(TILE_COLORS[j]).drawRect(1, j * 5 + 1, 30, 5);
-	  }
-	  return winTile;
 	};
 
 /***/ }
