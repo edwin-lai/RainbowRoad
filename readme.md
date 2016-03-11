@@ -18,3 +18,4 @@
 ## To-dos
 - Change the graphic for the pieces
 - Create card drawing animation and/or transition
+- Add sound effects and music (maybe)
