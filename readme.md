@@ -2,6 +2,8 @@
 
 **[Play Game!](http://edwin-lai.github.io/RainbowRoad/)**
 
+![RainbowRoad](/img/RainbowRoadScreenshot.png)
+
 ## Instructions
 1. Enter the number of human players.
 2. Click on the card on the right to draw a card.
